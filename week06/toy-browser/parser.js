@@ -1,4 +1,5 @@
 const EOF = Symbol("EOF"); // End Of File，这里要放一个唯一的东西代表文件结束
+const cssRule =require('./addCssRule');
 
 let currentToken = null;
 let currentAttribute = null;
@@ -25,6 +26,9 @@ function emit(token) {
         });
       }
     }
+
+    cssRule.computeCss(element, stack);
+
     top.children.push(element)
     element.parent = top;
 
@@ -36,6 +40,11 @@ function emit(token) {
     if(top.tagName != token.tagName) {
       throw new Error("Tag start end doesn't match!")
     } else {
+      // 收集css规则
+      if(top.tagName == 'style') {
+        cssRule.addCssRules(top.children[0].content);
+      }
+
       stack.pop();
     }
     currentTextNode = null;
@@ -50,7 +59,7 @@ function emit(token) {
     currentTextNode.content += token.content;
   }
 
-  console.log(token);
+  // console.log(token);
 }
 
 function data(c) {
@@ -264,7 +273,7 @@ module.exports.parserHtml = function parserHtml(html) {
       try {
         state = state(c);
       }catch(e) {
-          console.log(e, c);
+          // console.log(e, c);
       }
   }
   state = state(EOF); // 处理结束
