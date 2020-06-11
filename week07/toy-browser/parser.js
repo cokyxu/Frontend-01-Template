@@ -1,5 +1,6 @@
 const EOF = Symbol("EOF"); // End Of File，这里要放一个唯一的东西代表文件结束
 const cssRule =require('./addCssRule');
+const layout = require('./layout.js');
 
 let currentToken = null;
 let currentAttribute = null;
@@ -44,6 +45,7 @@ function emit(token) {
       if(top.tagName == 'style') {
         cssRule.addCssRules(top.children[0].content);
       }
+      layout(top);
 
       stack.pop();
     }
