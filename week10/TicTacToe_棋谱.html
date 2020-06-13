@@ -1,0 +1,223 @@
+<style>
+    .cell {
+        display: inline-block;
+        vertical-align: middle;
+        border: 1px solid white;
+        width: 100px;
+        height: 100px;
+        background-color: grey;
+
+        font-size: 50px;
+        line-height: 100px;
+        text-align: center;
+        color: red;
+    }
+</style>
+
+<div id="board"></div>
+
+<script>
+    var color = 1;
+    let pattern = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ];
+    let board = document.getElementById("board");
+    show();
+    function show() {
+        board.innerHTML = "";
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                let cell = document.createElement("div");
+                cell.className = "cell"
+                cell.innerHTML =
+                    pattern[i][j] == 1 ? "😇" :
+                        pattern[i][j] == 2 ? "😈" : "";
+
+                cell.addEventListener("click", e => move(j, i));
+
+                board.appendChild(cell);
+            }
+            board.appendChild(document.createElement("br"));
+        }
+    }
+
+    function move(x, y) {
+        if (pattern[y][x] !== 0) {
+            return;
+        }
+        pattern[y][x] = color;
+        show();
+        if (check(pattern, color)) {
+            alert(color === 1 ? "😇 win!" : "😈 win!");
+        }
+        color = 3 - color;
+
+        // if (willWin(pattern, color)) {
+        //     console.log(color === 1 ? "😇 will win!" : "😈 will win!")
+        // }
+        computerMove()
+        // console.log(bestChoice(pattern, color))
+    }
+
+    function computerMove() {
+        let opp = bestChoice(pattern, color);
+        if (opp.point) {
+            let x = opp.point[0];
+            let y = opp.point[1];
+            if (pattern[y][x] !== 0) {
+                return;
+            }
+            pattern[y][x] = color;
+            show();
+            if (check(pattern, color)) {
+                alert(color === 1 ? "😇 win!" : "😈 win!");
+            }
+            color = 3 - color;
+        }
+    }
+
+    function check(pattern, color) {
+        // 横向胜利
+        for (let i = 0; i < 3; i++) {
+            let win = true;
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j] !== color) {
+                    win = false;
+                    break;
+                }
+            }
+
+            if (win) {
+                return true;
+            }
+        }
+
+        // 纵向胜利
+        for (let i = 0; i < 3; i++) {
+            let win = true;
+            for (let j = 0; j < 3; j++) {
+                if (pattern[j][i] !== color) {
+                    win = false;
+                    break;
+                }
+            }
+
+            if (win) {
+                return true;
+            }
+        }
+
+        {
+            // 左斜
+            let win = true;
+            for (let i = 0; i < 3; i++) {
+                if (pattern[i][i] !== color) {
+                    win = false;
+                    break;
+                }
+            }
+            if (win) {
+                return true;
+            }
+        }
+
+        {
+            // 右斜
+            let win = true;
+            for (let i = 0; i < 3; i++) {
+                if (pattern[i][2 - i] !== color) {
+                    win = false;
+                    break;
+                }
+            }
+            if (win) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function clone(pattern) {
+        return JSON.parse(JSON.stringify(pattern));
+    }
+
+    function willWin(pattern, color) {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j] !== 0) {
+                    continue;
+                }
+                // let tmp = clone(pattern);
+                // 这里可以不需要 clone，后面将pattern复位为0即可
+                pattern[i][j] = color;
+                if (check(pattern, color)) {
+                    pattern[i][j] = 0;  // 复位
+                    return [j, i];
+                }
+                pattern[i][j] = 0;  // 复位
+            }
+        }
+        return null;
+    }
+
+    let openings = new Map();
+    openings.set([
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+    ].toString(), {
+        point: [1, 1],
+        result: 0
+    })
+
+    // -1: 输，0: 平，1: 赢
+    function bestChoice(pattern, color) {
+        // 棋谱
+        if (openings.has(pattern.toString())) {
+            return openings.get(pattern.toString());
+        }
+
+        let point = willWin(pattern, color);
+        if (point) {
+            return {
+                point: point,
+                result: 1
+            }
+        }
+
+        let result = -1;
+
+        let breakFlag = false;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (pattern[i][j] !== 0) {
+                    continue;
+                }
+
+                let tmp = clone(pattern);
+                tmp[i][j] = color;
+                let opp = bestChoice(tmp, 3 - color)
+                if (-opp.result >= result) {
+                    result = -opp.result;
+                    point = [j, i];
+                }
+                if (result === 1) {
+                    breakFlag = true;
+                    break;
+                }
+            }
+            if (breakFlag) {
+                break;
+            }
+        }
+
+        return {
+            result: point ? result : 0,
+            point: point
+        }
+    }
+
+
+</script>
