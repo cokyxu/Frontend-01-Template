@@ -1,0 +1,25 @@
+<div id="x">
+    <div>1</div>
+    <div>2</div>
+    <div>3</div>
+    <div>4</div>
+</div>
+
+<script>
+    var x = document.getElementById("x");
+    reverseChildren();
+
+    function reverseChildren() {
+        let range = new Range();
+        range.selectNodeContents(x);
+
+        let fragment = range.extractContents();  // 放到文档片段中
+        let len = fragment.children.length;
+
+        while(len--) {
+            fragment.appendChild(fragment.children[len]);
+        }
+        x.appendChild(fragment);
+
+    }
+</script>
