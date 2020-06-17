@@ -62,6 +62,7 @@ names = names.filter( e => !e.match(/^webkit/))
     objects.forEach(o => interfaces.add(o));
 
     names = names.filter(e => !interfaces.has(e));
+    console.log(JSON.stringify(names));
 }
 
 //http://www.ecma-international.org/ecma-402/5.0/index.html#Title
