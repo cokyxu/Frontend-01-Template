@@ -1,0 +1,89 @@
+<style>
+    .shape {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: gray;
+    }
+
+    #green.light {
+        background-color: green;
+    }
+
+    #yellow.light {
+        background-color: yellow;
+    }
+
+    #red.light {
+        background-color: red;
+    }
+</style>
+
+<div id="green" class="shape"></div>
+<div id="yellow" class="shape"></div>
+<div id="red" class="shape"></div>
+<button id="next">next</button>
+
+<script>
+    function green() {
+        var lights = document.getElementsByClassName("shape");
+        for (var i = 0; i < lights.length; i++) {
+            lights[i].classList.remove("light");
+        }
+        document.getElementById("green").classList.add("light");
+    }
+
+    function yellow() {
+        var lights = document.getElementsByClassName("shape");
+        for (var i = 0; i < lights.length; i++) {
+            lights[i].classList.remove("light");
+        }
+        document.getElementById("yellow").classList.add("light");
+    }
+
+    function red() {
+        var lights = document.getElementsByClassName("shape");
+        for (var i = 0; i < lights.length; i++) {
+            lights[i].classList.remove("light");
+        }
+        document.getElementById("red").classList.add("light");
+    }
+
+    function sleep(timespan) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, timespan);
+        })
+    }
+
+    function* go() {
+        while (true) {
+            green()
+            yield sleep(1000);
+            yellow()
+            yield sleep(200);
+            red();
+            yield sleep(500);
+        }
+    }
+
+    function run(iterator) {
+        let { value, done } = iterator.next();
+        
+        if(done) {
+            return;
+        }
+        if(value instanceof Promise) {
+            value.then(() => {
+                run(iterator);
+            })
+        }
+    }
+
+    function co(generator) {
+        return function() {
+            return run(generator());
+        }
+    }
+
+    go = co(go)()
+</script>

@@ -1,0 +1,125 @@
+<style>
+    .shape {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: gray;
+    }
+
+    #green.light {
+        background-color: green;
+    }
+
+    #yellow.light {
+        background-color: yellow;
+    }
+
+    #red.light {
+        background-color: red;
+    }
+</style>
+
+<div id="green" class="shape"></div>
+<div id="yellow" class="shape"></div>
+<div id="red" class="shape"></div>
+<button id="next">next</button>
+
+<script>
+    function green() {
+        var lights = document.getElementsByClassName("shape");
+        for (var i = 0; i < lights.length; i++) {
+            lights[i].classList.remove("light");
+        }
+        document.getElementById("green").classList.add("light");
+    }
+
+    function yellow() {
+        var lights = document.getElementsByClassName("shape");
+        for (var i = 0; i < lights.length; i++) {
+            lights[i].classList.remove("light");
+        }
+        document.getElementById("yellow").classList.add("light");
+    }
+
+    function red() {
+        var lights = document.getElementsByClassName("shape");
+        for (var i = 0; i < lights.length; i++) {
+            lights[i].classList.remove("light");
+        }
+        document.getElementById("red").classList.add("light");
+    }
+
+    // 手动操作
+    function happen(element) {
+        return new Promise((resolve) => {
+            element.addEventListener('click', resolve, { once: true });
+        })
+    }
+
+    async function go() {
+        while (true) {
+            green();
+            await happen(document.getElementById("next"));
+            yellow();
+            await happen(document.getElementById("next"));
+            red();
+            await happen(document.getElementById("next"));
+        }
+    }
+
+
+    //////////////  async, await 版本  ///////////////////////
+    // function sleep(timespan) {
+    //     return new Promise((resolve) => {
+    //         setTimeout(resolve, timespan);
+    //     })
+    // }
+
+    // async function go() {
+    //     while(true) {
+    //         green();
+    //         await sleep(1000);
+    //         yellow();
+    //         await sleep(200);
+    //         red();
+    //         await sleep(500);
+    //     }
+    // }
+    //////////////  async, await 版本  ///////////////////////
+
+    //////////////////// 改成 promise； 0.5分版本，和零分版本差距不大  /////////////////////////
+    // function sleep(timespan) {
+    //     return new Promise((resolve) => {
+    //         setTimeout(resolve, timespan);
+    //     })
+    // }
+
+    // function go() {
+    //     green();
+    //     sleep(1000).then(() => {
+    //         yellow();
+    //         return sleep(200);
+    //     }).then(() => {
+    //         red();
+    //         return sleep(500);
+    //     }).then(() => {
+    //         go();
+    //     })
+    // }
+    //////////////////// 改成 promise； 0.5分版本，和零分版本差距不大  /////////////////////////
+
+    /////////////////// 0 分版本  ////////////////////
+    // function go() {
+    //     green();
+    //     setTimeout(() => {
+    //         yellow();
+    //         setTimeout(() => {
+    //             red();
+    //             setTimeout(() => {
+    //                 go()
+    //             }, 50000);
+    //         }, 2000);
+    //     }, 10000);
+    // }
+    /////////////// 0 分版本  ////////////////////////
+</script>

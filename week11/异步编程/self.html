@@ -1,0 +1,62 @@
+<style>
+    .shape {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: gray;
+    }
+
+    #green.light {
+        background-color: green;
+    }
+    #yellow.light {
+        background-color: yellow;
+    }
+    #red.light {
+        background-color: red;
+    }
+</style>
+
+<div id="green" class="shape"></div>
+<div id="yellow" class="shape"></div>
+<div id="red" class="shape"></div>
+
+<script>
+    var green = document.getElementById("green")
+    var yellow = document.getElementById("yellow")
+    var red = document.getElementById("red")
+
+    var mapLight = {
+        red: {
+            obj: red,
+            color: 'red',
+            time: 5000,
+            next: 'green'
+        },
+        yellow: {
+            obj: yellow,
+            color: 'yellow',
+            time: 1000,
+            next: 'red'
+        },
+        green: {
+            obj: green,
+            color: 'green',
+            time: 3000,
+            next: 'yellow'
+        }
+    }
+
+    var status = 'green';
+
+    function changeLight() {
+        mapLight[status].obj.style.backgroundColor = status;
+        setTimeout(function () {
+            mapLight[status].obj.style.backgroundColor = 'grey';
+            status = mapLight[status].next;
+            changeLight()
+        }, mapLight[status].time);
+    }
+
+    changeLight()
+</script>
