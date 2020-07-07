@@ -1,0 +1,94 @@
+<input id="pr" type="text">
+
+
+<script>
+    let object = { a: 1 };
+    let object2 = { a: 100 };
+    let object3 = { a: {x: 200} };
+    let handlers = new Map();
+    let reactivities = new Map();
+    let usedReactivities = [];
+
+    // 
+    function reactive(obj) {
+        if(reactivities.has(obj)) {
+            return reactivities.get(obj);
+        }
+
+        let proxy = new Proxy(obj, {
+            set: function (obj, prop, value) {
+                obj[prop] = value;
+
+                // 将该对象的该属性的handler都取出来，然后执行一遍，以实现影响其绑定的所有变量
+                if(handlers.get(obj)) {
+                    if(handlers.get(obj).get(prop)) {
+                        for(let handler of handlers.get(obj).get(prop)) {
+                            handler();
+                        }
+                    }
+                }
+
+                return obj[prop];
+            },
+            get: function (obj, prop) {
+                // 依赖收集
+                usedReactivities.push([obj, prop]);
+
+                if(typeof obj[prop] === 'object') {
+                    return reactive(obj[prop])
+                }
+
+                return obj[prop];
+            }
+        })
+
+        // 防止重复包装
+        reactivities.set(obj, proxy) 
+
+        return proxy;
+    }
+
+    function effect(handler) {
+        handler();
+        
+        // 这里已经完成了依赖收集
+        for(let usedReactivity of usedReactivities) {
+            let [obj, prop] = usedReactivity;
+
+            if(!handlers.has(obj)) {
+                handlers.set(obj, new Map());
+            }
+
+            if(!handlers.get(obj).has(prop)) {
+                handlers.get(obj).set(prop, []);
+            }
+
+            handlers.get(obj).get(prop).push(handler)
+        }
+    }
+
+    let p1 = reactive(object);
+    let p2 = reactive(object2);
+    let p3 = reactive(object3);
+
+    let v1;
+    let v2;
+    let v3;
+    let v;
+
+    effect(() => v = p1.a + p2.a);
+    effect(() => v1 = p1.a);
+    effect(() => v2 = p2.a);
+    effect(() => v3 = p3.a.x);
+    p3.a.x = 90
+
+
+    // 双向绑定
+    effect(() => {
+        document.getElementById("pr").value = p1.a;
+    });
+
+    document.getElementById("pr").addEventListener("input", event => {
+        p1.a = event.target.value;
+    })
+</script>
