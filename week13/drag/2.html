@@ -1,0 +1,85 @@
+<style>
+    .bg-pink {
+        background-color: pink;
+    }
+
+    .bg-blue {
+        background-color: black;
+    }
+</style>
+<div id="container">
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+    文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字 文字
+</div>
+<div id="dragable" class="bg-pink" style="width: 100px; height: 100px; display: inline-block;"></div>
+
+
+<!-- 拖拽到文字中 -->
+<script>
+    let dragable = document.getElementById("dragable");
+
+    let baseX = 0;
+    let baseY = 0;
+
+    dragable.addEventListener("mousedown", event => {
+        dragable.className = "bg-blue";
+        let sx = event.clientX;
+        let sy = event.clientY;
+        let move = event => {
+
+            let range = nearest(event.clientX, event.clientY);
+            range.insertNode(dragable);
+
+            // let x = baseX + event.clientX - sx;
+            // let y = baseY + event.clientY - sy;
+            // dragable.style.transform = `translate(${x}px, ${y}px)`
+        };
+        let up = event => {
+            // baseX = baseX + event.clientX - sx, baseY = baseY + event.clientY - sy;
+            document.removeEventListener("mousemove", move);
+            document.removeEventListener("mouseup", up);
+            dragable.className = "bg-pink";
+        };
+        document.addEventListener("mousemove", move);
+        document.addEventListener("mouseup", up);
+    });
+
+    let ranges = [];
+
+    let container = document.getElementById("container")
+
+    for (let i = 0; i < container.childNodes[0].textContent.length; i++) {
+        let range = document.createRange();
+        range.setStart(container.childNodes[0], i)
+        range.setEnd(container.childNodes[0], i)
+        ranges.push(range)
+    }
+
+    function nearest(x0, y0) {
+        let nearRange = null;
+        let distance = Infinity
+        for(let range of ranges) {
+            let {x, y} = range.getBoundingClientRect();
+            let d = (x - x0) ** 2 + (y - y0) ** 2;
+            if(d < distance) {
+                distance = d;
+                nearRange = range;
+            }
+        }
+
+        return nearRange;
+    }
+</script>

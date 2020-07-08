@@ -1,14 +1,37 @@
-<div id="dragable" style="background: pink; width: 100px; height: 100px;"></div>
+<style>
+    .bg-pink {
+        background-color: pink;
+    }
+    .bg-blue {
+        background-color: black;
+    }
+</style>
 
+<div id="dragable" class="bg-pink" style="width: 100px; height: 100px;"></div>
+
+
+<!-- 单纯的拖拽 -->
 <script>
     let dragable = document.getElementById("dragable");
 
+    let baseX = 0;
+    let baseY = 0;
+
     dragable.addEventListener("mousedown", event => {
+        dragable.className = "bg-blue";
+        let sx = event.clientX;
+        let sy = event.clientY;
         let move = event => {
-            
+            let x = baseX + event.clientX - sx;
+            let y = baseY + event.clientY -sy;
+
+            dragable.style.transform = `translate(${x}px, ${y}px)`
         };
         let up = event => {
-
+            baseX = baseX + event.clientX - sx, baseY = baseY + event.clientY - sy;
+            document.removeEventListener("mousemove", move);
+            document.removeEventListener("mouseup", up);
+            dragable.className = "bg-pink";
         };
         document.addEventListener("mousemove", move);
         document.addEventListener("mouseup", up);
