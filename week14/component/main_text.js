@@ -24,7 +24,7 @@ function create(Cls, attributes, ...children) {
     return o;
 }
 
-class MyComponent {
+class Div {
     constructor(config) {
         this.children = [];
         this.root = document.createElement("div");
@@ -42,22 +42,12 @@ class MyComponent {
         this.children.push(child)
     }
 
-    render() {
-        return <article>
-            <header>header</header>
-                { this.slot }
-            <footer>footer</footer>
-        </article>
-    }
-
     mountTo(parent) {
-        this.slot = <div></div>
-        for (let child of this.children) {
-            this.slot.appendChild(child);
-            // child.mountTo(this.slot);
-        }
-        this.render().mountTo(parent);
+        parent.appendChild(this.root);
 
+        for (let child of this.children) {
+            child.mountTo(this.root)
+        }
     }
 }
 
@@ -100,12 +90,12 @@ class Wrapper {
     }
 }
 
-let component = <MyComponent id="a" class="b" style="width: 100px; height: 100px; background-color:lightgreen">
-    <MyComponent id="child"></MyComponent>
-    <MyComponent>123</MyComponent>
+let component = <Div id="a" class="b" style="width: 100px; height: 100px; background-color:lightgreen">
+    <Div id="child"></Div>
+    <Div>123</Div>
     <p></p>
     <span id="str"></span>
-</MyComponent>
+</Div>
 
 component.class = "c"
 
