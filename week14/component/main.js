@@ -1,30 +1,7 @@
-const foo = require("./foo")
+import { create } from "./createElement"
 
-function create(Cls, attributes, ...children) {
-    let o;
-    if (typeof Cls === 'string') {
-        o = new Wrapper(Cls)
-    } else {
-        o = new Cls({
-            timer: {}
-        });
-    }
 
-    for (let key in attributes) {
-        // o[key] = attributes[key];
-        o.setAttribute(key, attributes[key]);
-    }
-
-    for (let child of children) {
-        if (typeof child === "string") {
-            child = new Text(child);
-        }
-        o.children.push(child);
-    }
-    return o;
-}
-
-class MyComponent {
+class Carousel {
     constructor(config) {
         this.children = [];
         this.root = document.createElement("div");
@@ -36,76 +13,76 @@ class MyComponent {
 
     setAttribute(name, value) {
         this.root.setAttribute(name, value);
+        this[name] = value;
     }
 
     appendChild(child) {
         this.children.push(child)
     }
 
+    addEventListener(type, hander, confg) {
+        this.root.addEventListener(type, hander, confg)
+    }
+
     render() {
-        return <article>
-            <header>header</header>
-                { this.slot }
-            <footer>footer</footer>
-        </article>
+        let children = this.data.map(url => {
+            let element = <img src={url} />
+            element.addEventListener("dragstart", event => event.preventDefault());
+            return element;
+        });
+        let root = <div class="carousel">
+            {children}
+        </div>
+
+        let position = 0;
+
+        let nextpic = () => {
+
+            let nextPosition = (position + 1) % this.data.length;
+
+            let current = children[position];
+            let next = children[nextPosition];
+
+            /////////////////////////////////////////////////////////////////////////////////////
+            current.style.transition = "none"; // 与下面的写法等效
+            next.style.transition = "ease 0s";
+            ///////////////  意思是从其他地方到下面的位置是不需要动画的  ///////////////////////////
+
+            current.style.transform = `translateX(${- 100 * position}%)`;
+            next.style.transform = `translateX(${100 - 100 * nextPosition}%)`;
+
+            // 用 setTimeout 16ms 是一种比较安全的方式（不使用异步在其他浏览器可能会有问题）
+            // 连续的 dom 操作会合并
+            setTimeout(() => {
+                current.style.transition = ""; // mean use css rule
+                next.style.transition = "";
+                current.style.transform = `translateX(${-100 - 100 * position}%)`;
+                next.style.transform = `translateX(${- 100 * nextPosition}%)`;
+
+                position = nextPosition;
+            }, 16);
+
+            setTimeout(nextpic, 3000);
+        }
+        setTimeout(nextpic, 3000);
+
+        return root
     }
 
     mountTo(parent) {
-        this.slot = <div></div>
-        for (let child of this.children) {
-            this.slot.appendChild(child);
-            // child.mountTo(this.slot);
-        }
         this.render().mountTo(parent);
 
     }
 }
 
-class Text {
-    constructor(type) {
-        this.root = document.createTextNode(type);
-    }
-
-    mountTo(parent) {
-        parent.appendChild(this.root);
-    }
-}
 
 
-// 处理小写的 div (渲染成字符串的div)
-class Wrapper {
-    constructor(type) {
-        this.children = [];
-        this.root = document.createElement(type);
-    }
-
-    set class(v) {
-        this.root.className = v;
-    }
-
-    setAttribute(name, value) {
-        this.root.setAttribute(name, value);
-    }
-
-    appendChild(child) {
-        this.children.push(child)
-    }
-
-    mountTo(parent) {
-        parent.appendChild(this.root);
-
-        for (let child of this.children) {
-            child.mountTo(this.root)
-        }
-    }
-}
-
-let component = <MyComponent id="a" class="b" style="width: 100px; height: 100px; background-color:lightgreen">
-    <MyComponent id="child"></MyComponent>
-    <MyComponent>123</MyComponent>
-    <p></p>
-    <span id="str"></span>
-</MyComponent>
+let component = <Carousel data={[
+    "https://static001.geekbang.org/resource/image/bb/21/bb38fb7c1073eaee1755f81131f11d21.jpg",
+    "https://static001.geekbang.org/resource/image/1b/21/1b809d9a2bdf3ecc481322d7c9223c21.jpg",
+    "https://static001.geekbang.org/resource/image/b6/4f/b6d65b2f12646a9fd6b8cb2b020d754f.jpg",
+    "https://static001.geekbang.org/resource/image/73/e4/730ea9c393def7975deceb48b3eb6fe4.jpg",
+]}></Carousel>
 
 component.class = "c"
 
