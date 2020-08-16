@@ -4,23 +4,26 @@ export function enableGesture(element) {
 
     let MOUSE_SYMBOL = Symbol("mouse");
 
-    element.addEventListener("mousedown", () => {
-        contexts[MOUSE_SYMBOL] = Object.create(null);
-        start(event, contexts[MOUSE_SYMBOL]);
+    if (document.ontouchstart !== null) {
+        element.addEventListener("mousedown", () => {
+            contexts[MOUSE_SYMBOL] = Object.create(null);
+            start(event, contexts[MOUSE_SYMBOL]);
 
-        let mousemove = (event) => {
-            move(event, contexts[MOUSE_SYMBOL]);
-            // console.log(event.clientX, event, event.clientX);
-        };
-        let mouseend = (event) => {
-            end(event, contexts[MOUSE_SYMBOL]);
-            document.removeEventListener("mousemove", mousemove);
-            document.removeEventListener("mouseup", mouseend);
-        };
+            let mousemove = (event) => {
+                move(event, contexts[MOUSE_SYMBOL]);
+                // console.log(event.clientX, event, event.clientX);
+            };
+            let mouseend = (event) => {
+                end(event, contexts[MOUSE_SYMBOL]);
+                document.removeEventListener("mousemove", mousemove);
+                document.removeEventListener("mouseup", mouseend);
+            };
 
-        document.addEventListener("mousemove", mousemove);
-        document.addEventListener("mouseup", mouseend);
-    });
+            document.addEventListener("mousemove", mousemove);
+            document.addEventListener("mouseup", mouseend);
+        });
+    }
+
 
     element.addEventListener("touchstart", event => {
         for (let touch of event.changedTouches) {
@@ -76,7 +79,6 @@ export function enableGesture(element) {
             context.isPan = false;
             context.isPress = true;
 
-            console.log("press start");
         }, 500);
     }
 
@@ -88,7 +90,6 @@ export function enableGesture(element) {
             if (context.isPress) {
                 let e = new CustomEvent("presscancel");
                 element.dispatchEvent(e);
-                console.log("press cancel");
             }
 
             context.isTab = false;
@@ -103,7 +104,6 @@ export function enableGesture(element) {
                 clientY: point.clientY
             });
             element.dispatchEvent(e);
-            console.log("pan start");
         }
 
         if (context.isPan) {
@@ -122,7 +122,6 @@ export function enableGesture(element) {
                 clientY: point.clientY
             });
             element.dispatchEvent(e);
-            console.log("pan")
         }
     }
 
@@ -149,7 +148,6 @@ export function enableGesture(element) {
                     speed: speed
                 });
                 element.dispatchEvent(e);
-                console.log("flick");
             }
             let e = new CustomEvent("panend");
             Object.assign(e, {
@@ -160,11 +158,9 @@ export function enableGesture(element) {
                 speed: speed
             });
             element.dispatchEvent(e);
-            console.log("isPan", speed);
         }
 
         if (context.isPress) {
-            console.log("isPress");
         }
 
         clearTimeout(context.isTimeHandler);
